@@ -27,3 +27,6 @@ npm run dev
 ```sh
 npm run build
 ```
+
+
+<!-- add display error cho login/singup ho di trang -->

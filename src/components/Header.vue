@@ -7,25 +7,28 @@
     <nav class="main-nav">
       <ul class="main-nav-list">
         <li>
-          <router-link to="/" class="main-nav-link nav-cta"
-            >Main Menu</router-link
-          >
+          <router-link to="/" class="main-nav-link nav-cta">Main Menu</router-link>
         </li>
         <li>
-          <router-link class="main-nav-link" to="/register"
-            >Register</router-link
-          >
+          <router-link class="main-nav-link" to="/register">Register</router-link>
         </li>
         <li>
           <router-link to="/order" class="main-nav-link">Order</router-link>
         </li>
         <li>
-          <router-link to="/features" class="main-nav-link"
-            >Features</router-link
-          >
+          <router-link to="/features" class="main-nav-link">Features</router-link>
+        </li>
+        <!-- Conditionally render order-history link -->
+        <li v-if="isAuth">
+          <router-link to="/order-history" class="main-nav-link">Order History</router-link>
         </li>
       </ul>
     </nav>
+
+    <div class="user-info">
+      <img v-if="userId" :src="userAvatar" class="avatar" alt="User Avatar" />
+      <span v-else class="user-id">ID: null</span>
+    </div>
 
     <button class="btn-mobile-nav">
       <ion-icon class="icon-mobile-nav" name="menu-outline"></ion-icon>
@@ -34,10 +37,20 @@
   </header>
 </template>
 
-<script>
-export default {
-  name: "Header",
-};
+<script setup>
+import { computed } from 'vue';
+import { useStore } from 'vuex';
+
+const store = useStore();
+
+const userId = computed(() => store.getters.userId);
+const isAuth = computed(() => store.getters.isAuth);
+
+const userAvatar = computed(() => {
+  return userId.value
+    ? `https://api.adorable.io/avatars/40/${userId.value}.png`
+    : '';
+});
 </script>
 
 <style scoped>
@@ -46,16 +59,10 @@ export default {
   justify-content: space-between;
   align-items: center;
   background-color: #fdf2e9;
-
-  /* Because we want header to be sticky later */
   height: 9.6rem;
   padding: 0 4.8rem;
   position: relative;
 }
-
-/**************************/
-/* NAVIGATION */
-/**************************/
 
 .main-nav-list {
   list-style: none;
@@ -92,12 +99,10 @@ export default {
   background-color: #cf711f;
 }
 
-/* MOBILE */
 .btn-mobile-nav {
   border: none;
   background: none;
   cursor: pointer;
-
   display: none;
 }
 
@@ -111,7 +116,6 @@ export default {
   display: none;
 }
 
-/* STICKY NAVIGATION */
 .sticky .header {
   position: fixed;
   top: 0;
@@ -127,5 +131,21 @@ export default {
 
 .sticky .section-hero {
   margin-top: 9.6rem;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+}
+
+.avatar {
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+}
+
+.user-id {
+  font-size: 1.8rem;
+  color: #333;
 }
 </style>

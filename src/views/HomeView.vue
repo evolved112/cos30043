@@ -19,7 +19,6 @@
           <a href="#cta" class="btn btn--full margin-right-sm"
             >Start eating well</a
           >
-
           <a href="#how" class="btn btn--outline">Learn more &darr;</a>
         </div>
         <div class="hero-img-box" id="background">
@@ -40,74 +39,67 @@
         <h2 class="heading-secondary">This is the best tacos in the WORLD.</h2>
       </div>
 
-      <article class="container grid grid--2-cols grid--center-v">
-        <!-- Taco 1 -->
-        <div class="step-text-box">
-          <p class="step-number">01</p>
-          <h3 class="heading-tertiary">Tacos de Birria</h3>
-          <p class="step-description">
-            Traditionally, birria is a dish served as a stew for special
-            occasions. In northern Mexico, it served with tortilla so it became
-            taco, and we can’t get enough!
-          </p>
-        </div>
-
-        <div class="step-img-box">
-          <img
-            src="../assets/taco1.jpeg"
-            class="step-img"
-            alt="iPhone app
-            preferences selection screen"
-          />
-        </div>
-
-        <!-- Taco 2 -->
-        <div class="step-img-box">
-          <img
-            src="../assets/taco2.jpeg"
-            class="step-img"
-            alt="iPhone app
-            meal approving plan screen"
-          />
-        </div>
-        <div class="step-text-box">
-          <p class="step-number">02</p>
-          <h3 class="heading-tertiary">Tacos de Pescado</h3>
-          <p class="step-description">
-            Along Mexico’s Baja California coast, you’ll likely come across the
-            smell of fresh fish tacos. Whether you get them fried or grilled,
-            the flaky white fish is typically topped with shredded cabbage, pico
-            de gallo, or sour cream. The perfect meal for a day on the beach!
-          </p>
-        </div>
-
-        <!-- Taco 3 -->
-        <div class="step-text-box">
-          <p class="step-number">03</p>
-          <h3 class="heading-tertiary">Carnitas</h3>
-          <p class="step-description">
-            The pulled pork tender yet crispy in a corn tortilla. Perfect for a
-            day. This taco originated from Michoacán, takes quite a chef to make
-            but it is worth it!
-          </p>
-        </div>
-        <div class="step-img-box">
-          <img
-            src="../assets/taco3.jpeg"
-            class="step-img"
-            alt="iPhone app
-            delivery screen"
-          />
+      <article class="container grid">
+        <div v-for="(taco, index) in displayedTacos" :key="index" :class="`taco-item ${index % 2 === 0 ? 'left' : 'right'}`">
+          <div class="step-text-box">
+            <p class="step-number">{{ index + 1 + (currentPage - 1) * itemsPerPage }}</p>
+            <h3 class="heading-tertiary">{{ taco.name }}</h3>
+            <p class="step-description">{{ taco.description }}</p>
+          </div>
+          <div class="step-img-box">
+            <img :src="taco.imgurl" class="step-img" :alt="taco.name" />
+          </div>
         </div>
       </article>
+
+      <paginate
+        :page-count="totalPages"
+        :click-handler="changePage"
+        :prev-text="'Prev'"
+        :next-text="'Next'"
+        :container-class="'pagination'"
+      />
     </section>
   </main>
 </template>
 
-<script>
-export default {
-  name: "HomeView",
+<script setup>
+import { ref, computed, onMounted } from 'vue';
+import Paginate from 'vuejs-paginate-next';
+import store from "../store/index.js"
+
+const tacos = ref([]);
+const currentPage = ref(1);
+const itemsPerPage = 3;
+
+const totalPages = computed(() => Math.ceil(tacos.value.length / itemsPerPage));
+
+const displayedTacos = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return tacos.value.slice(start, end);
+});
+
+const loadTacos = async () => {
+  try {
+    const response = await fetch("https://tica-taco-default-rtdb.asia-southeast1.firebasedatabase.app/tacos.json");
+    if (response.ok) {
+      const data = await response.json();
+      tacos.value = data;
+    }
+  } catch (error) {
+    console.error('Failed to load tacos:', error);
+  }
 };
+
+const changePage = (page) => {
+  currentPage.value = page;
+};
+
+onMounted(() => {
+  loadTacos();
+  store.getters.isAuth;
+});
 </script>
 
 <style scoped>
@@ -172,12 +164,27 @@ export default {
   color: #cf711f;
   font-weight: 700;
 }
+
 /**************************/
 /* HOW IT WORKS SECTION */
 /**************************/
 
 .section-how {
   padding: 9.6rem 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+}
+
+.taco-item.left {
+  grid-column: 1 / 2;
+}
+
+.taco-item.right {
+  grid-column: 2 / 3;
 }
 
 .step-number {
@@ -194,7 +201,6 @@ export default {
 
 .step-img-box {
   position: relative;
-
   display: flex;
   align-items: center;
   justify-content: center;
@@ -213,11 +219,7 @@ export default {
 
 .step-img-box::before {
   width: 60%;
-  /* height: 60%; */
-
-  /* 60% of parent's width */
   padding-bottom: 60%;
-
   background-color: #fdf2e9;
   z-index: -2;
 }
@@ -232,9 +234,27 @@ export default {
 .step-img {
   width: 40%;
   border-radius: 10%;
-  /* z-index: 10; */
 }
+
 .step-img:hover {
   transform: scale(1.1);
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.pagination button {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 </style>

@@ -11,6 +11,7 @@
   "dependencies": {
     "vue": "^3.4.29",
     "vue-router": "^4.3.3",
+    "vuejs-paginate-next": "^1.0.2",
     "vuetify": "^3.6.13-3.7.0-beta.0.0",
     "vuex": "^4.0.2"
   },

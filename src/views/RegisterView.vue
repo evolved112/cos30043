@@ -1,3 +1,4 @@
+<!-- add display error ho di luc nao day :)) -->
 <template>
   <div class="register container">
     <form @submit.prevent="submit" >
@@ -58,7 +59,9 @@
       </div>
 
       <div class="container signin">
-        <p>Already have an account? <a href="#">Sign in</a>.</p>
+        <p>Already an account?<router-link class="main-nav-link" to="/login"
+            >Sign in</router-link
+          >.</p>
       </div>
     </form>
   </div>
@@ -73,30 +76,31 @@ const store = useStore();
 const email = ref("");
 const psw = ref("");
 const pswr = ref("");
+const isLoading = ref(false);
+const error = ref(null);
 
-const submit = () => {
+
+ const submit = async () => {
   if (email.value === '' || psw.value !== pswr.value) {
     console.log("invalid input");
     return;
   }
-
-  // fetch('https://tica-taco-default-rtdb.asia-southeast1.firebasedatabase.app/acc.json', {
-  //   method: 'POST',
-  //   headers: {
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify({
-  //     name: uName.value,
-  //     email: email.value,
-  //     psw: psw.value
-  //   }),
-  // });
+  isLoading.value = true;
 
   //send https request 
-  store.dispatch('signup', {
+
+  try {
+    await store.dispatch('signup', {
     email: email.value,
     password: psw.value
   })
+  } catch (err) {
+    error.value = err.message || "failed";
+    console.log(error);
+  }
+  
+
+  isLoading.value = false;
 };
 
 </script>
