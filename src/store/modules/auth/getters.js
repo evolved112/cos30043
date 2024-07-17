@@ -6,7 +6,9 @@ export default {
     return state.token;
   },
   isAuth(state) {
-    console.log(state);
     return !!state.token;
+  },
+  isAdmin() {
+    return "yOpDjNgHgzUXbTSxlBe4TuHSKD92";
   }
 };

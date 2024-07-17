@@ -1,6 +1,6 @@
 <template>
   <div class="container order">
-    <form method="post" action="" id="order">
+    <form @submit.prevent="submitOrder" id="order">
       <div>
         <h1>Order <br /><br /></h1>
         <p>Please fill in this form to order.</p>
@@ -83,6 +83,9 @@
 
 <script setup>
 import { ref, watch } from 'vue';
+import { useStore } from 'vuex';
+
+const store = useStore();
 
 const deliveryMethod = ref('');
 const deliveryAddress = ref('');
@@ -101,7 +104,10 @@ const tacos = ref([]);
 const fetchTacos = async () => {
   const response = await fetch('https://tica-taco-default-rtdb.asia-southeast1.firebasedatabase.app/tacos.json');
   const data = await response.json();
-  tacos.value = data.map(taco => ({ ...taco, quantity: 1 }));
+  tacos.value = data.map(taco => ({
+    ...taco,
+    quantity: 1,
+  }));
 };
 
 const updateTotalPrice = () => {
@@ -128,6 +134,52 @@ const checkPaymentMethod = () => {
     creditCardType.value = '';
     creditCardInfo.value = '';
   }
+};
+
+const submitOrder = async () => {
+  const orderData = {
+    userId: store.getters.userId,
+    deliveryMethod: deliveryMethod.value,
+    deliveryAddress: deliveryMethod.value === 'Delivery' ? deliveryAddress.value : null,
+    contactNumber: contactNumber.value,
+    email: email.value,
+    paymentMethod: paymentMethod.value,
+    creditCardType: paymentMethod.value === 'Pay online' ? creditCardType.value : null,
+    creditCardInfo: paymentMethod.value === 'Pay online' ? creditCardInfo.value : null,
+    selectedTacos: selectedTacos.value.map(({ name, price, quantity }) => ({ name, price, quantity })),
+    totalPrice: totalPrice.value,
+  };
+
+  const response = await fetch('https://tica-taco-default-rtdb.asia-southeast1.firebasedatabase.app/orderHistory.json', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(orderData)
+  });
+
+  if (!response.ok) {
+    console.error('Failed to submit order');
+  } else {
+    console.log('Order submitted successfully');
+    alert('Order submitted successfully');
+    // Optionally reset form fields
+    resetForm();
+  }
+};
+
+const resetForm = () => {
+  deliveryMethod.value = '';
+  deliveryAddress.value = '';
+  sameAsDeliveryAddress.value = false;
+  billingAddress.value = '';
+  contactNumber.value = '';
+  email.value = '';
+  paymentMethod.value = '';
+  creditCardType.value = '';
+  creditCardInfo.value = '';
+  selectedTacos.value = [];
+  totalPrice.value = 0;
 };
 
 watch(selectedTacos, updateTotalPrice);

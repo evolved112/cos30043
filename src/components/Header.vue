@@ -9,7 +9,7 @@
         <li>
           <router-link to="/" class="main-nav-link nav-cta">Main Menu</router-link>
         </li>
-        <li>
+        <li v-if="!isAuth">
           <router-link class="main-nav-link" to="/register">Register</router-link>
         </li>
         <li>
@@ -28,6 +28,7 @@
     <div class="user-info">
       <img v-if="userId" :src="userAvatar" class="avatar" alt="User Avatar" />
       <span v-else class="user-id">ID: null</span>
+      <button v-if="isAuth" @click="logout" class="logout-button">Logout</button>
     </div>
 
     <button class="btn-mobile-nav">
@@ -51,6 +52,10 @@ const userAvatar = computed(() => {
     ? `https://api.adorable.io/avatars/40/${userId.value}.png`
     : '';
 });
+
+const logout = () => {
+  store.dispatch('logout');
+};
 </script>
 
 <style scoped>
@@ -147,5 +152,19 @@ const userAvatar = computed(() => {
 .user-id {
   font-size: 1.8rem;
   color: #333;
+}
+
+.logout-button {
+  margin-left: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #e67e22;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  background-color: #cf711f;
 }
 </style>
