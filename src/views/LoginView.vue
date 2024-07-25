@@ -13,8 +13,10 @@
           name="email"
           id="email"
           v-model="email"
+          @blur="validateEmail"
           required
         />
+        <p v-if="emailError" class="error">{{ emailError }}</p>
 
         <label for="psw"><b>Password</b></label>
         <input
@@ -23,12 +25,13 @@
           name="psw"
           id="psw"
           v-model="psw"
+          @blur="validatePassword"
           required
         />
+        <p v-if="passwordError" class="error">{{ passwordError }}</p>
 
-        <hr />
         <div class="button">
-          <button type="submit" class="loginbtn submit btn btn--full">
+          <button type="submit" class="loginbtn submit btn btn--full" :disabled="isLoading">
             Login
           </button>
           <button type="reset" class="loginbtn reset btn btn--outline">
@@ -37,7 +40,9 @@
         </div>
 
         <div class="container signin">
-          <p>Don't have an account?<router-link class="main-nav-link" to="/register">Register</router-link>.</p>
+          <p>
+            Don't have an account? <router-link class="main-nav-link" to="/register">Register</router-link>.
+          </p>
         </div>
 
         <div v-if="error" class="error-message">
@@ -56,23 +61,50 @@ import { useRouter } from 'vue-router';
 const store = useStore();
 const router = useRouter();
 
-const email = ref("");
-const psw = ref("");
+const email = ref('');
+const psw = ref('');
 const isLoading = ref(false);
 const error = ref(null);
 
+const emailError = ref(null);
+const passwordError = ref(null);
+
+const validateEmail = () => {
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailPattern.test(email.value)) {
+    emailError.value = 'Please enter a valid email address.';
+  } else {
+    emailError.value = null;
+  }
+};
+
+const validatePassword = () => {
+  if (psw.value.length < 6) {
+    passwordError.value = 'Password must be at least 6 characters long.';
+  } else {
+    passwordError.value = null;
+  }
+};
+
 const submit = async () => {
+  validateEmail();
+  validatePassword();
+
+  if (emailError.value || passwordError.value) {
+    return;
+  }
+
   isLoading.value = true;
   error.value = null;
 
   try {
     await store.dispatch('login', {
       email: email.value,
-      password: psw.value
+      password: psw.value,
     });
     router.push({ name: 'home' });
   } catch (err) {
-    error.value = err.message || "Login failed";
+    error.value = err.message || 'Login failed';
     console.log(error.value);
   }
 
@@ -92,8 +124,8 @@ const submit = async () => {
 }
 
 /* Full-width input fields */
-input[type="text"],
-input[type="password"] {
+input[type='text'],
+input[type='password'] {
   width: 100%;
   padding: 15px;
   margin: 5px 0 22px 0;
@@ -102,8 +134,8 @@ input[type="password"] {
   background: #f1f1f1;
 }
 
-input[type="text"]:focus,
-input[type="password"]:focus {
+input[type='text']:focus,
+input[type='password']:focus {
   background-color: #ddd;
   outline: none;
 }
@@ -119,12 +151,11 @@ hr {
   background-color: #e67e22;
   color: white;
   padding: 16px 20px;
-  margin: 8px 0;
-  border: 2px solid #db3816;
+  margin-bottom: 20px;
+  border: 2px solid white;
   cursor: pointer;
   width: 50%;
   opacity: 0.9;
-  font-size: 150%;
   float: left;
 }
 
@@ -140,8 +171,8 @@ a {
 
 /* Set a grey background color and center the text of the "sign in" section */
 .signin {
-  background-color: #f1f1f1;
   text-align: center;
+  margin-bottom: 20px;
 }
 
 * {
@@ -149,7 +180,15 @@ a {
   box-shadow: none;
 }
 
-/* Style for error message */
+/* Style for error messages */
+.error {
+  color: red;
+  font-size: 1.2rem;
+  margin-top: -15px;
+  margin-bottom: 15px;
+}
+
+/* Style for error message displayed on form submit */
 .error-message {
   color: red;
   margin-top: 10px;

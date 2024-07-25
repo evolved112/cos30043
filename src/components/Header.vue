@@ -10,7 +10,7 @@
           <router-link to="/" class="main-nav-link nav-cta">Main Menu</router-link>
         </li>
         <li v-if="!isAuth">
-          <router-link class="main-nav-link" to="/register">Register</router-link>
+          <router-link :class="getLinkClass('/register', '/login')" :to="authRoute">{{ authText }}</router-link>
         </li>
         <li>
           <router-link to="/order" class="main-nav-link">Order</router-link>
@@ -18,7 +18,6 @@
         <li>
           <router-link to="/features" class="main-nav-link">Features</router-link>
         </li>
-        <!-- Conditionally render order-history link -->
         <li v-if="isAuth">
           <router-link to="/order-history" class="main-nav-link">Order History</router-link>
         </li>
@@ -38,11 +37,15 @@
   </header>
 </template>
 
+
 <script setup>
 import { computed } from 'vue';
 import { useStore } from 'vuex';
+import { useRouter, useRoute } from 'vue-router';
 
 const store = useStore();
+const router = useRouter();
+const route = useRoute();
 
 const userId = computed(() => store.getters.userId);
 const isAuth = computed(() => store.getters.isAuth);
@@ -55,8 +58,20 @@ const userAvatar = computed(() => {
 
 const logout = () => {
   store.dispatch('logout');
+  router.push('/');
 };
+
+const getLinkClass = (registerRoute, loginRoute) => {
+  return route.path === registerRoute || route.path === loginRoute
+    ? 'main-nav-link router-link-active'
+    : 'main-nav-link';
+};
+
+const authRoute = computed(() => (route.path === '/login' ? '/register' : '/login'));
+const authText = computed(() => (route.path === '/login' ? 'Login' : 'Register'));
 </script>
+
+
 
 <style scoped>
 .header {

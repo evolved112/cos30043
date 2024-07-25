@@ -1,21 +1,10 @@
-<!-- add display error ho di luc nao day :)) -->
 <template>
   <div class="register container">
-    <form @submit.prevent="submit" >
+    <form @submit.prevent="submit">
       <div class="containereg">
         <h1>Register <br /><br /></h1>
         <p>Please fill in this form to create an account.</p>
         <hr />
-        <!-- <label for="uname" ><b>Username</b></label>
-        <input
-          type="text"
-          placeholder="Username"
-          name="uname"
-          id="uname"
-          v-model="uName"
-          :onchange="uNameValidator"
-          required
-        /> -->
 
         <label for="email"><b>Email</b></label>
         <input
@@ -24,8 +13,10 @@
           name="email"
           id="email"
           v-model="email"
+          @blur="validateEmail"
           required
         />
+        <p v-if="emailError" class="error">{{ emailError }}</p>
 
         <label for="psw"><b>Password</b></label>
         <input
@@ -34,8 +25,10 @@
           name="psw"
           id="psw"
           v-model="psw"
+          @blur="validatePassword"
           required
         />
+        <p v-if="passwordError" class="error">{{ passwordError }}</p>
 
         <label for="psw_repeat"><b>Repeat Password</b></label>
         <input
@@ -44,13 +37,14 @@
           name="psw-repeat"
           id="psw_repeat"
           v-model="pswr"
+          @blur="validatePasswordRepeat"
           required
         />
-        <hr />
+        <p v-if="passwordRepeatError" class="error">{{ passwordRepeatError }}</p>
       </div>
-      <hr />
+
       <div class="button">
-        <button type="submit" class="registerbtn submit btn btn--full">
+        <button type="submit" class="registerbtn submit btn btn--full" :disabled="isLoading">
           Submit
         </button>
         <button type="reset" class="registerbtn reset btn btn--outline">
@@ -59,55 +53,88 @@
       </div>
 
       <div class="container signin">
-        <p>Already an account?<router-link class="main-nav-link" to="/login"
-            >Sign in</router-link
-          >.</p>
+        <p>
+          Already have an account?
+          <router-link class="main-nav-link" to="/login">Sign in</router-link>.
+        </p>
       </div>
     </form>
+    <p v-if="error" class="error">{{ error }}</p>
   </div>
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+
 const store = useStore();
+const router = useRouter();
 
-
-const email = ref("");
-const psw = ref("");
-const pswr = ref("");
+const email = ref('');
+const psw = ref('');
+const pswr = ref('');
 const isLoading = ref(false);
 const error = ref(null);
 
+const emailError = ref(null);
+const passwordError = ref(null);
+const passwordRepeatError = ref(null);
 
- const submit = async () => {
-  if (email.value === '' || psw.value !== pswr.value) {
-    console.log("invalid input");
+const validateEmail = () => {
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailPattern.test(email.value)) {
+    emailError.value = 'Please enter a valid email address.';
+  } else {
+    emailError.value = null;
+  }
+};
+
+const validatePassword = () => {
+  if (psw.value.length < 6) {
+    passwordError.value = 'Password must be at least 6 characters long.';
+  } else {
+    passwordError.value = null;
+  }
+};
+
+const validatePasswordRepeat = () => {
+  if (psw.value !== pswr.value) {
+    passwordRepeatError.value = 'Passwords do not match.';
+  } else {
+    passwordRepeatError.value = null;
+  }
+};
+
+const submit = async () => {
+  validateEmail();
+  validatePassword();
+  validatePasswordRepeat();
+
+  if (emailError.value || passwordError.value || passwordRepeatError.value) {
     return;
   }
-  isLoading.value = true;
 
-  //send https request 
+  isLoading.value = true;
 
   try {
     await store.dispatch('signup', {
-    email: email.value,
-    password: psw.value
-  })
+      email: email.value,
+      password: psw.value,
+    });
+    router.push({ name: 'home' });
   } catch (err) {
-    error.value = err.message || "failed";
-    console.log(error);
+    error.value = err.message || 'Registration failed';
   }
-  
 
   isLoading.value = false;
 };
-
 </script>
 
-
-
 <style scoped>
+h1 {
+  padding-top: 25px;
+}
 .register {
   font-size: 200%;
 }
@@ -118,8 +145,8 @@ const error = ref(null);
 }
 
 /* Full-width input fields */
-input[type="text"],
-input[type="password"] {
+input[type='text'],
+input[type='password'] {
   width: 100%;
   padding: 15px;
   margin: 5px 0 22px 0;
@@ -128,8 +155,8 @@ input[type="password"] {
   background: #f1f1f1;
 }
 
-input[type="text"]:focus,
-input[type="password"]:focus {
+input[type='text']:focus,
+input[type='password']:focus {
   background-color: #ddd;
   outline: none;
 }
@@ -145,12 +172,11 @@ hr {
   background-color: #e67e22;
   color: white;
   padding: 16px 20px;
-  margin: 8px 0;
-  border: 2px solid #db3816;
+  margin-bottom: 20px;
+  border: 2px solid white;
   cursor: pointer;
   width: 50%;
   opacity: 0.9;
-  font-size: 150%;
   float: left;
 }
 
@@ -166,11 +192,19 @@ a {
 
 /* Set a grey background color and center the text of the "sign in" section */
 .signin {
-  background-color: #f1f1f1;
   text-align: center;
+  margin-bottom: 20px;
 }
+
 * {
   box-sizing: border-box;
   box-shadow: none;
+}
+
+.error {
+  color: red;
+  font-size: 1.2rem;
+  margin-top: -15px;
+  margin-bottom: 15px;
 }
 </style>

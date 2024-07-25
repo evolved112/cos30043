@@ -39,38 +39,55 @@
         <h2 class="heading-secondary">This is the best tacos in the WORLD.</h2>
       </div>
 
-      <article class="container grid">
-        <div v-for="(taco, index) in displayedTacos" :key="index" :class="`taco-item ${index % 2 === 0 ? 'left' : 'right'}`">
-          <div class="step-text-box">
-            <p class="step-number">{{ index + 1 + (currentPage - 1) * itemsPerPage }}</p>
+      <article class="container">
+        <div v-for="(taco, index) in displayedTacos" :key="index" class="grid">
+          <!-- :class="`taco-item ${index % 2 === 0 ? 'left' : 'right'}`" -->
+          <div :class="`step-text-box ${index % 2 === 0 ? 'left' : 'right'}`">
+            <p class="step-number">
+              {{ index + 1 + (currentPage - 1) * itemsPerPage }}
+            </p>
             <h3 class="heading-tertiary">{{ taco.name }}</h3>
             <p class="step-description">{{ taco.description }}</p>
+            <!-- like -->
+            <div class="likes">
+              <span class="likenum">
+                <i class="fa fa-heart"></i>
+                Likes: {{ taco.likes }}
+                <button v-if="isAuth" @click="likeTaco(taco)">
+                {{ taco.liked ? 'Unlike' : 'Like' }}
+              </button>
+              </span>
+            </div>
           </div>
-          <div class="step-img-box">
+          <div :class="`step-img-box ${index % 2 === 0 ? 'left' : 'right'}`">
             <img :src="taco.imgurl" class="step-img" :alt="taco.name" />
           </div>
         </div>
       </article>
 
-      <paginate
-        :page-count="totalPages"
-        :click-handler="changePage"
-        :prev-text="'Prev'"
-        :next-text="'Next'"
-        :container-class="'pagination'"
-      />
+      <div>
+        <paginate
+          :page-count="totalPages"
+          :click-handler="changePage"
+          :prev-text="'Prev'"
+          :next-text="'Next'"
+          :container-class="'pagination'"
+        />
+      </div>
     </section>
   </main>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import Paginate from 'vuejs-paginate-next';
-import store from "../store/index.js"
+import { ref, computed, onMounted } from "vue";
+import Paginate from "vuejs-paginate-next";
+import store from "../store/index.js";
 
 const tacos = ref([]);
 const currentPage = ref(1);
 const itemsPerPage = 3;
+
+const isAuth = computed(() => store.getters.isAuth);
 
 const totalPages = computed(() => Math.ceil(tacos.value.length / itemsPerPage));
 
@@ -82,18 +99,45 @@ const displayedTacos = computed(() => {
 
 const loadTacos = async () => {
   try {
-    const response = await fetch("https://tica-taco-default-rtdb.asia-southeast1.firebasedatabase.app/tacos.json");
+    const response = await fetch(
+      "https://tica-taco-default-rtdb.asia-southeast1.firebasedatabase.app/tacos.json"
+    );
     if (response.ok) {
       const data = await response.json();
       tacos.value = data;
     }
   } catch (error) {
-    console.error('Failed to load tacos:', error);
+    console.error("Failed to load tacos:", error);
   }
 };
 
 const changePage = (page) => {
   currentPage.value = page;
+};
+
+const likeTaco = async (taco) => {
+  const index = tacos.value.indexOf(taco);
+  if (index !== -1) {
+    tacos.value[index].liked = !tacos.value[index].liked;
+    tacos.value[index].likes += tacos.value[index].liked ? 1 : -1;
+
+    try {
+      await fetch(
+        `https://tica-taco-default-rtdb.asia-southeast1.firebasedatabase.app/tacos/${index}.json`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ likes: tacos.value[index].likes }),
+        }
+      );
+    } catch (error) {
+      console.error("Failed to update likes:", error);
+      tacos.value[index].liked = !tacos.value[index].liked;
+      tacos.value[index].likes += tacos.value[index].liked ? -1 : 1;
+    }
+  }
 };
 
 onMounted(() => {
@@ -179,14 +223,17 @@ onMounted(() => {
   gap: 2rem;
 }
 
-.taco-item.left {
+.step-text-box.left {
   grid-column: 1 / 2;
 }
 
-.taco-item.right {
+.step-text-box.right {
   grid-column: 2 / 3;
 }
-
+.step-img-box.right {
+  grid-column: 1/1;
+  grid-row: 1/1;
+}
 .step-number {
   font-size: 8.6rem;
   font-weight: 600;
@@ -232,8 +279,12 @@ onMounted(() => {
 }
 
 .step-img {
-  width: 40%;
+  /* width: 40%; */
   border-radius: 10%;
+  margin: 1rem;
+  width: 24rem;
+  height: 20rem;
+  object-fit: cover;
 }
 
 .step-img:hover {
@@ -243,18 +294,35 @@ onMounted(() => {
 .pagination {
   display: flex;
   justify-content: center;
-  gap: 1rem;
+  gap: 4rem;
   margin-top: 2rem;
+  list-style-type: none;
+  margin: 0;
+  padding-top: 6rem;
+  font-size: 2rem;
+  cursor: pointer;
+}
+
+.pagination :hover {
+  text-decoration-line: underline;
 }
 
 .pagination button {
   padding: 0.5rem 1rem;
-  font-size: 1rem;
   cursor: pointer;
 }
 
 .pagination button:disabled {
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+.likenum {
+  font-size: 2rem;
+  line-height: 1.6;
+}
+
+.likes {
+  margin-top: 2rem;
 }
 </style>
