@@ -9,19 +9,33 @@
     </div>
     <div v-for="order in filteredOrders" :key="order.id" class="order-item">
       <p class="item"><strong>Order ID:</strong> {{ order.id }}</p>
-      <p class="item"><strong>Delivery Method:</strong> {{ order.deliveryMethod }}</p>
-      <p v-if="order.deliveryMethod === 'Delivery'" class="item"><strong>Delivery Address:</strong> {{ order.deliveryAddress }}</p>
-      <p class="item"><strong>Contact Number:</strong> {{ order.contactNumber }}</p>
+      <p class="item">
+        <strong>Delivery Method:</strong> {{ order.deliveryMethod }}
+      </p>
+      <p v-if="order.deliveryMethod === 'Delivery'" class="item">
+        <strong>Delivery Address:</strong> {{ order.deliveryAddress }}
+      </p>
+      <p class="item">
+        <strong>Contact Number:</strong> {{ order.contactNumber }}
+      </p>
       <p class="item"><strong>Email:</strong> {{ order.email }}</p>
-      <p class="item"><strong>Payment Method:</strong> {{ order.paymentMethod }}</p>
-      <p class="item" v-if="order.paymentMethod === 'Pay online'"><strong>Credit Card Type:</strong> {{ order.creditCardType }}</p>
+      <p class="item">
+        <strong>Payment Method:</strong> {{ order.paymentMethod }}
+      </p>
+      <p class="item" v-if="order.paymentMethod === 'Pay online'">
+        <strong>Credit Card Type:</strong> {{ order.creditCardType }}
+      </p>
       <div class="item tacolist">
         <strong>Selected Tacos:</strong>
         <ul>
-          <li v-for="taco in order.selectedTacos" :key="taco.name">{{ taco.name }} - ${{ taco.price }} x {{ taco.quantity }}</li>
+          <li v-for="taco in order.selectedTacos" :key="taco.name">
+            {{ taco.name }} - ${{ taco.price }} x {{ taco.quantity }}
+          </li>
         </ul>
       </div>
-      <p class="item" v-color="order.orderStatus" ><strong>Order Status:</strong> {{ order.orderStatus }}</p>
+      <p class="item" v-color="order.orderStatus">
+        <strong>Order Status:</strong> {{ order.orderStatus }}
+      </p>
       <p class="item"><strong>Total Price:</strong> ${{ order.totalPrice }}</p>
       <div v-if="isAdmin">
         <button @click="editOrder(order)">Edit Status</button>
@@ -46,6 +60,7 @@
 </template>
 
 <script setup>
+//setup data
 import { ref, computed } from "vue";
 import { useStore } from "vuex";
 
@@ -56,24 +71,25 @@ const adminId = store.getters.isAdmin;
 const showModal = ref(false);
 const selectedOrder = ref({});
 
+// custom directive to change color depends on the what is the status of order
 const vColor = {
   beforeMount(el, binding) {
-    if (binding.value === 'Delivered') {
-      el.style.color = 'green';
-    } else if (binding.value === 'Pending') {
-      el.style.color = 'red';
+    if (binding.value === "Delivered") {
+      el.style.color = "green";
+    } else if (binding.value === "Pending") {
+      el.style.color = "red";
     }
   },
   updated(el, binding) {
-    if (binding.value === 'Delivered') {
-      el.style.color = 'green';
-    } else if (binding.value === 'Pending') {
-      el.style.color = 'red';
+    if (binding.value === "Delivered") {
+      el.style.color = "green";
+    } else if (binding.value === "Pending") {
+      el.style.color = "red";
     }
   },
-}
+};
 
-
+// fetch data
 const fetchOrders = async () => {
   const response = await fetch(
     "https://tica-taco-default-rtdb.asia-southeast1.firebasedatabase.app/orderHistory.json"
@@ -81,17 +97,19 @@ const fetchOrders = async () => {
   const data = await response.json();
   orders.value = Object.keys(data).map((key) => ({ id: key, ...data[key] }));
 };
-
+// check if the user is the admin then change view if not change view
 const isAdmin = computed(() => userId === adminId);
 const filteredOrders = computed(() => {
-  return isAdmin.value ? orders.value : orders.value.filter((order) => order.userId === userId);
+  return isAdmin.value
+    ? orders.value
+    : orders.value.filter((order) => order.userId === userId);
 });
 
 const editOrder = (order) => {
   selectedOrder.value = { ...order };
   showModal.value = true;
 };
-
+// update status
 const updateOrderStatus = async () => {
   try {
     await fetch(
@@ -112,7 +130,7 @@ const updateOrderStatus = async () => {
     console.error("Failed to update order status:", error);
   }
 };
-
+// delete order
 const deleteOrder = async (orderId) => {
   await fetch(
     `https://tica-taco-default-rtdb.asia-southeast1.firebasedatabase.app/orderHistory/${orderId}.json`,

@@ -6,23 +6,6 @@
           <img class="logo" alt="tica's taco" src="../assets/logo.png" />
         </a>
 
-        <ul class="social-links">
-          <li>
-            <a class="footer-link" href="#">
-              <ion-icon class="social-icon" name="logo-instagram"></ion-icon>
-            </a>
-          </li>
-          <li>
-            <a class="footer-link" href="#">
-              <ion-icon class="social-icon" name="logo-facebook"></ion-icon>
-            </a>
-          </li>
-          <li>
-            <a class="footer-link" href="#">
-              <ion-icon class="social-icon" name="logo-twitter"></ion-icon>
-            </a>
-          </li>
-        </ul>
         <!--copyright-->
         <p class="copyright">
           Copyright &copy; <span class="year">2022</span> by Tica's taco, Inc.

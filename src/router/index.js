@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "../views/HomeView.vue";
-import FeaturesView from "../views/FeaturesView.vue";
 import OrderView from "../views/OrderView.vue";
 import RegisterView from "../views/RegisterView.vue";
 import LoginView from "../views/LoginView.vue";
@@ -14,11 +13,6 @@ const router = createRouter({
       path: "/",
       name: "home",
       component: HomeView,
-    },
-    {
-      path: "/features",
-      name: "features",
-      component: FeaturesView,
     },
     {
       path: "/order",
@@ -47,7 +41,7 @@ const router = createRouter({
 // Navigation guard
 router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth && !store.getters.isAuth) {
-    next({ name: 'login' });
+    next({ name: "login" });
   } else {
     next();
   }

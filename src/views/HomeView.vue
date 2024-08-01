@@ -41,23 +41,34 @@
 
       <article class="container">
         <div v-for="(taco, index) in displayedTacos" :key="index" class="grid">
-          <!-- :class="`taco-item ${index % 2 === 0 ? 'left' : 'right'}`" -->
           <div :class="`step-text-box ${index % 2 === 0 ? 'left' : 'right'}`">
             <p class="step-number">
               {{ index + 1 + (currentPage - 1) * itemsPerPage }}
             </p>
             <h3 class="heading-tertiary">{{ taco.name }}</h3>
             <p class="step-description">{{ taco.description }}</p>
+
             <!-- like -->
             <div class="likes">
               <span class="likenum">
-                <i class="fa fa-heart"></i>
-                Likes: {{ taco.likes }}
-                <button v-if="isAuth" @click="likeTaco(taco)">
-                {{ taco.liked ? 'Unlike' : 'Like' }}
-              </button>
+                <i
+                  v-show="isAuth"
+                  class="fa fa-heart"
+                  @click="likeTaco(taco)"
+                  :class="`likecolour ${taco.liked ? 'like' : 'unlike'}`"
+                >
+                </i>
+                <i
+                  v-show="!isAuth"
+                  class="fa fa-heart tooltip"
+                  :class="`likecolour ${taco.liked ? 'like' : 'unlike'}`"
+                >
+                  <span class="tooltiptext">Login to like</span>
+                </i>
+                {{ taco.likes }} Likes
               </span>
             </div>
+
           </div>
           <div :class="`step-img-box ${index % 2 === 0 ? 'left' : 'right'}`">
             <img :src="taco.imgurl" class="step-img" :alt="taco.name" />
@@ -79,6 +90,7 @@
 </template>
 
 <script setup>
+// setup data
 import { ref, computed, onMounted } from "vue";
 import Paginate from "vuejs-paginate-next";
 import store from "../store/index.js";
@@ -97,6 +109,7 @@ const displayedTacos = computed(() => {
   return tacos.value.slice(start, end);
 });
 
+// load tacos
 const loadTacos = async () => {
   try {
     const response = await fetch(
@@ -114,7 +127,7 @@ const loadTacos = async () => {
 const changePage = (page) => {
   currentPage.value = page;
 };
-
+// Social function
 const likeTaco = async (taco) => {
   const index = tacos.value.indexOf(taco);
   if (index !== -1) {
@@ -176,39 +189,6 @@ onMounted(() => {
   width: 100%;
 }
 
-.delivered-meals {
-  display: flex;
-  align-items: center;
-  gap: 1.6rem;
-  margin-top: 8rem;
-}
-
-.delivered-imgs {
-  display: flex;
-}
-
-.delivered-imgs img {
-  height: 4.8rem;
-  width: 4.8rem;
-  border-radius: 50%;
-  margin-right: -1.6rem;
-  border: 3px solid #fdf2e9;
-}
-
-.delivered-imgs img:last-child {
-  margin: 0;
-}
-
-.delivered-text {
-  font-size: 1.8rem;
-  font-weight: 600;
-}
-
-.delivered-text span {
-  color: #cf711f;
-  font-weight: 700;
-}
-
 /**************************/
 /* HOW IT WORKS SECTION */
 /**************************/
@@ -234,6 +214,7 @@ onMounted(() => {
   grid-column: 1/1;
   grid-row: 1/1;
 }
+
 .step-number {
   font-size: 8.6rem;
   font-weight: 600;
@@ -325,4 +306,50 @@ onMounted(() => {
 .likes {
   margin-top: 2rem;
 }
+
+.likecolour.like {
+  color: red;
+}
+/* Tooltip container */
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%; /* Position the tooltip above the text */
+  left: 50%;
+  margin-left: -60px; /* Use half of the width to center the tooltip */
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+/* Tooltip arrow */
+.tooltip .tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%; /* At the bottom of the tooltip */
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: black transparent transparent transparent;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+
 </style>

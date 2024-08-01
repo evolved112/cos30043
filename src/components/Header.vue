@@ -7,27 +7,32 @@
     <nav class="main-nav">
       <ul class="main-nav-list">
         <li>
-          <router-link to="/" class="main-nav-link nav-cta">Main Menu</router-link>
+          <router-link to="/" class="main-nav-link nav-cta"
+            >Main Menu</router-link
+          >
         </li>
         <li v-if="!isAuth">
-          <router-link :class="getLinkClass('/register', '/login')" :to="authRoute">{{ authText }}</router-link>
+          <router-link
+            :class="getLinkClass('/register', '/login')"
+            :to="authRoute"
+            >{{ authText }}</router-link
+          >
         </li>
         <li>
           <router-link to="/order" class="main-nav-link">Order</router-link>
         </li>
-        <li>
-          <router-link to="/features" class="main-nav-link">Features</router-link>
-        </li>
         <li v-if="isAuth">
-          <router-link to="/order-history" class="main-nav-link">Order History</router-link>
+          <router-link to="/order-history" class="main-nav-link"
+            >Order History</router-link
+          >
         </li>
       </ul>
     </nav>
-
     <div class="user-info">
-      <img v-if="userId" :src="userAvatar" class="avatar" alt="User Avatar" />
-      <span v-else class="user-id">ID: null</span>
-      <button v-if="isAuth" @click="logout" class="logout-button">Logout</button>
+      <img v-if="userId" src="../assets/avatar.png" class="avatar" alt="User Avatar" />
+      <button v-if="isAuth" @click="logout" class="logout-button">
+        Logout
+      </button>
     </div>
 
     <button class="btn-mobile-nav">
@@ -37,11 +42,11 @@
   </header>
 </template>
 
-
 <script setup>
-import { computed } from 'vue';
-import { useStore } from 'vuex';
-import { useRouter, useRoute } from 'vue-router';
+//setup data
+import { computed } from "vue";
+import { useStore } from "vuex";
+import { useRouter, useRoute } from "vue-router";
 
 const store = useStore();
 const router = useRouter();
@@ -49,29 +54,26 @@ const route = useRoute();
 
 const userId = computed(() => store.getters.userId);
 const isAuth = computed(() => store.getters.isAuth);
-
-const userAvatar = computed(() => {
-  return userId.value
-    ? `https://api.adorable.io/avatars/40/${userId.value}.png`
-    : '';
-});
-
+// logout method
 const logout = () => {
-  store.dispatch('logout');
-  router.push('/');
+  store.dispatch("logout");
+  router.push("/");
 };
 
 const getLinkClass = (registerRoute, loginRoute) => {
   return route.path === registerRoute || route.path === loginRoute
-    ? 'main-nav-link router-link-active'
-    : 'main-nav-link';
+    ? "main-nav-link router-link-active"
+    : "main-nav-link";
 };
+// i'm bad at math
+const authRoute = computed(() =>
+    route.path !== "/login" ? "/login" : "/register"
 
-const authRoute = computed(() => (route.path === '/login' ? '/register' : '/login'));
-const authText = computed(() => (route.path === '/login' ? 'Login' : 'Register'));
+);
+const authText = computed(() =>
+  route.path !== "/login" ? "Login" : "Register"
+);
 </script>
-
-
 
 <style scoped>
 .header {

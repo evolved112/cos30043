@@ -40,14 +40,23 @@
           @blur="validatePasswordRepeat"
           required
         />
-        <p v-if="passwordRepeatError" class="error">{{ passwordRepeatError }}</p>
+        <p v-if="passwordRepeatError" class="error">
+          {{ passwordRepeatError }}
+        </p>
       </div>
 
-      <div class="button">
-        <button type="submit" class="registerbtn submit btn btn--full" :disabled="isLoading">
+      <div class="button button-acc">
+        <button
+          type="submit"
+          class="registerbtn submit btn btn--full button-acc"
+          :disabled="isLoading"
+        >
           Submit
         </button>
-        <button type="reset" class="registerbtn reset btn btn--outline">
+        <button
+          type="reset"
+          class="registerbtn reset btn btn--outline button-acc"
+        >
           Reset
         </button>
       </div>
@@ -55,7 +64,9 @@
       <div class="container signin">
         <p>
           Already have an account?
-          <router-link class="main-nav-link" to="/login">Sign in</router-link>.
+          <router-link class="main-nav-link signlog-btn" to="/login"
+            >Sign in</router-link
+          >.
         </p>
       </div>
     </form>
@@ -64,27 +75,28 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
+// setup data
+import { ref, computed } from "vue";
+import { useStore } from "vuex";
+import { useRouter } from "vue-router";
 
 const store = useStore();
 const router = useRouter();
 
-const email = ref('');
-const psw = ref('');
-const pswr = ref('');
+const email = ref("");
+const psw = ref("");
+const pswr = ref("");
 const isLoading = ref(false);
 const error = ref(null);
 
 const emailError = ref(null);
 const passwordError = ref(null);
 const passwordRepeatError = ref(null);
-
+// validator
 const validateEmail = () => {
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailPattern.test(email.value)) {
-    emailError.value = 'Please enter a valid email address.';
+    emailError.value = "Please enter a valid email address.";
   } else {
     emailError.value = null;
   }
@@ -92,7 +104,7 @@ const validateEmail = () => {
 
 const validatePassword = () => {
   if (psw.value.length < 6) {
-    passwordError.value = 'Password must be at least 6 characters long.';
+    passwordError.value = "Password must be at least 6 characters long.";
   } else {
     passwordError.value = null;
   }
@@ -100,7 +112,7 @@ const validatePassword = () => {
 
 const validatePasswordRepeat = () => {
   if (psw.value !== pswr.value) {
-    passwordRepeatError.value = 'Passwords do not match.';
+    passwordRepeatError.value = "Passwords do not match.";
   } else {
     passwordRepeatError.value = null;
   }
@@ -118,13 +130,13 @@ const submit = async () => {
   isLoading.value = true;
 
   try {
-    await store.dispatch('signup', {
+    await store.dispatch("signup", {
       email: email.value,
       password: psw.value,
     });
-    router.push({ name: 'home' });
+    router.push({ name: "home" });
   } catch (err) {
-    error.value = err.message || 'Registration failed';
+    error.value = err.message || "Registration failed";
   }
 
   isLoading.value = false;
@@ -145,8 +157,8 @@ h1 {
 }
 
 /* Full-width input fields */
-input[type='text'],
-input[type='password'] {
+input[type="text"],
+input[type="password"] {
   width: 100%;
   padding: 15px;
   margin: 5px 0 22px 0;
@@ -155,8 +167,8 @@ input[type='password'] {
   background: #f1f1f1;
 }
 
-input[type='text']:focus,
-input[type='password']:focus {
+input[type="text"]:focus,
+input[type="password"]:focus {
   background-color: #ddd;
   outline: none;
 }
@@ -176,7 +188,6 @@ hr {
   border: 2px solid white;
   cursor: pointer;
   width: 50%;
-  opacity: 0.9;
   float: left;
 }
 
